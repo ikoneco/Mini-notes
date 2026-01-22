@@ -7,12 +7,11 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Box, IconButton, Typography, Button, Tooltip } from '@mui/material';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
-import MicRoundedIcon from '@mui/icons-material/MicRounded';
-import MicNoneRoundedIcon from '@mui/icons-material/MicNoneRounded';
+import ShortTextIcon from '@mui/icons-material/ShortText';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 
-import { DocIcon } from '../src/components/DocIcon';
 import { listNotes } from '../src/lib/infra/notesStore';
 import { createOrUpdateNote } from '../src/lib/infra/notesStore';
 import { useAutosave } from '../src/lib/ui/useAutosave';
@@ -27,6 +26,21 @@ import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(useGSAP);
 
+/**
+ * Mock helper to get an emoji based on note title
+ */
+function getEmoji(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes('interview')) return '🤝';
+  if (t.includes('mobile')) return '📱';
+  if (t.includes('stripe') || t.includes('billing')) return '💳';
+  if (t.includes('database')) return '🗄️';
+  if (t.includes('marketing')) return '📈';
+  if (t.includes('analytics') || t.includes('report')) return '📊';
+  if (t.includes('meeting')) return '📝';
+  if (t.includes('onboarding')) return '👋';
+  return '📄';
+}
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -186,6 +200,7 @@ export default function Home() {
     }
   );
 
+  const displayEmoji = getEmoji(title);
 
   const handleNoteSelect = (note: Note) => {
     stopListening();
@@ -351,46 +366,42 @@ export default function Home() {
         {/* Top Header Bar - Simplified */}
         <Box
           sx={{
-            height: 56,
+            height: 48,
             display: 'flex',
             alignItems: 'center',
-            px: 4, // Aligned with content breathability
+            px: 2,
             borderBottom: '1px solid',
             borderColor: 'divider',
             justifyContent: 'space-between',
-            bgcolor: 'background.default',
           }}
         >
           {/* Left Side: Navigation & Breadcrumbs */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {!isNotesListOpen && (
-              <IconButton size="small" onClick={() => setIsNotesListOpen(true)} sx={{ color: 'text.secondary', opacity: 0.6 }}>
-                <MenuRoundedIcon fontSize="small" />
+              <IconButton size="small" onClick={() => setIsNotesListOpen(true)}>
+                <ShortTextIcon fontSize="small" />
               </IconButton>
             )}
 
             {/* Breadcrumbs */}
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
               <Typography
-                variant="body2"
+                variant="caption"
                 onClick={handleGoHome}
                 sx={{
                   color: 'text.muted',
                   cursor: 'pointer',
                   '&:hover': { color: 'text.primary' },
-                  fontWeight: view === 'home' ? 600 : 400,
-                  fontSize: '0.85rem'
+                  fontWeight: view === 'home' ? 600 : 400
                 }}
               >
                 Home
               </Typography>
               {view === 'editor' && (
                 <>
-                  <ChevronRightRoundedIcon sx={{ fontSize: '1.2rem', color: 'text.muted', mx: 1, opacity: 0.5 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', display: 'flex', alignItems: 'center', fontSize: '0.85rem' }}>
-                    <Box component="span" sx={{ mr: 1, display: 'flex', color: 'text.muted' }}>
-                      <DocIcon size={16} opacity={0.4} />
-                    </Box>
+                  <KeyboardArrowRightIcon sx={{ fontSize: '0.9rem', color: 'text.muted', mx: 0.3 }} />
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'flex', alignItems: 'center' }}>
+                    <Box component="span" sx={{ mr: 0.5 }}>{displayEmoji}</Box>
                     {title || 'Untitled'}
                   </Typography>
                 </>
@@ -419,12 +430,11 @@ export default function Home() {
                     className="voice-pulse"
                     sx={{
                       color: isListening ? 'error.main' : 'text.secondary',
-                      opacity: isListening ? 1 : 0.6,
                       bgcolor: isListening ? 'rgba(211, 47, 47, 0.05)' : 'transparent',
                       '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.1)' : 'rgba(0,0,0,0.03)' }
                     }}
                   >
-                    {isListening ? <MicRoundedIcon fontSize="small" /> : <MicNoneRoundedIcon fontSize="small" />}
+                    {isListening ? <MicOutlinedIcon fontSize="small" /> : <MicNoneOutlinedIcon fontSize="small" />}
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -451,7 +461,7 @@ export default function Home() {
         </Box>
 
         {/* Scrollable Content Area */}
-        <Box className="view-transition-container" sx={{ flex: 1, overflowY: 'auto', p: 8, display: 'flex', justifyContent: 'center', alignItems: view === 'home' ? 'center' : 'flex-start' }}>
+        <Box className="view-transition-container" sx={{ flex: 1, overflowY: 'auto', p: 4, display: 'flex', justifyContent: 'center', alignItems: view === 'home' ? 'center' : 'flex-start' }}>
           {view === 'home' ? (
             <Box sx={{ maxWidth: 400, textAlign: 'center', mb: 8 }}>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary', letterSpacing: '-0.02em' }}>
@@ -483,10 +493,11 @@ export default function Home() {
           ) : (
             <Box sx={{ width: '100%', maxWidth: 720, position: 'relative' }}>
 
-              <Box sx={{ mb: 10 }}>
-                <Box sx={{ mb: 6, display: 'flex', color: 'text.primary' }}>
-                  <DocIcon size={72} opacity={0.15} />
-                </Box>
+              {/* Document Header - Matches Screenshot 2 Large Title */}
+              <Box sx={{ mb: 6 }}>
+                <Typography sx={{ fontSize: '4rem', mb: 2, display: 'block' }}>
+                  {displayEmoji}
+                </Typography>
                 <Box
                   component="textarea"
                   value={title}

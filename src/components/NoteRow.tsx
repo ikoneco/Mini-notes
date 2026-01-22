@@ -8,9 +8,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import { DocIcon } from './DocIcon';
+import { Box, Typography, IconButton, Chip } from '@mui/material';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { Note } from '../lib/domain/types';
 
 export interface NoteRowProps {
@@ -18,6 +17,34 @@ export interface NoteRowProps {
     isSelected: boolean;
     onSelect: (note: Note) => void;
     onDelete: (noteId: string) => void;
+}
+
+/**
+ * Mock helper to get an emoji based on note title
+ */
+function getEmoji(title: string): string {
+    const t = title.toLowerCase();
+    if (t.includes('interview')) return '🤝';
+    if (t.includes('mobile')) return '📱';
+    if (t.includes('stripe') || t.includes('billing')) return '💳';
+    if (t.includes('database')) return '🗄️';
+    if (t.includes('marketing')) return '📈';
+    if (t.includes('analytics') || t.includes('report')) return '📊';
+    if (t.includes('meeting')) return '📝';
+    if (t.includes('onboarding')) return '👋';
+    return '📄';
+}
+
+/**
+ * Mock tags based on note title
+ */
+function getTags(title: string) {
+    const t = title.toLowerCase();
+    if (t.includes('marketing')) return [{ label: 'Marketing', color: '#ffedd5', textColor: '#9a3412' }];
+    if (t.includes('interview')) return [{ label: 'HR', color: '#f3e8ff', textColor: '#581c87' }];
+    if (t.includes('stripe') || t.includes('billing')) return [{ label: 'Engineering', color: '#fce7f3', textColor: '#9d174d' }];
+    if (t.includes('sales')) return [{ label: 'Sales', color: '#ecfdf5', textColor: '#065f46' }];
+    return [];
 }
 
 /**
@@ -57,6 +84,8 @@ export default function NoteRow({
         setMounted(true);
     }, []);
 
+    const emoji = getEmoji(note.title);
+    const tags = getTags(note.title);
     const formattedDate = mounted ? formatDate(note.createdAt) : '';
 
     return (
@@ -66,36 +95,39 @@ export default function NoteRow({
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: 1.75,
+                py: 1.5,
                 px: 2,
                 cursor: 'pointer',
-                borderRadius: '8px',
+                borderRadius: 1,
                 mb: 0.5,
-                transition: 'all 0.1s ease-out',
-                backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                transition: 'all 0.12s ease-out',
+                backgroundColor: isSelected ? 'action.selected' : 'transparent',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                    backgroundColor: isSelected ? 'action.selected' : 'rgba(0, 0, 0, 0.02)',
                     '& .delete-button': {
                         opacity: 1,
                     }
                 },
             }}
         >
-            {/* Minimal High-End Icon */}
-            <Box sx={{ mr: 2.5, display: 'flex', color: isSelected ? 'text.primary' : 'text.muted' }}>
-                <DocIcon size={18} opacity={isSelected ? 0.6 : 0.3} />
-            </Box>
+            {/* Emoji Icon */}
+            <Typography sx={{ fontSize: '1.2rem', mr: 2, mt: -0.2 }}>
+                {emoji}
+            </Typography>
 
             {/* Title & Snippet */}
-            <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
                 <Typography
                     sx={{
-                        fontWeight: isSelected ? 600 : 400,
-                        fontSize: '0.88rem',
-                        color: isSelected ? 'text.primary' : 'rgba(0, 0, 0, 0.8)',
+                        fontWeight: 500,
+                        fontSize: '0.95rem',
+                        color: 'text.primary',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        borderBottom: isSelected ? '1px solid transparent' : '1px solid rgba(0,0,0,0.1)',
+                        display: 'inline-block',
+                        maxWidth: '100%',
                     }}
                 >
                     {note.title || 'Untitled'}
@@ -103,19 +135,37 @@ export default function NoteRow({
             </Box>
 
             {/* Metadata Section (Right side) */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
                 {/* Date */}
                 <Typography
                     variant="caption"
                     sx={{
-                        color: 'text.muted',
+                        color: 'text.secondary',
                         whiteSpace: 'nowrap',
-                        fontSize: '0.75rem',
-                        opacity: 0.6
+                        fontSize: '0.8rem',
                     }}
                 >
                     {formattedDate}
                 </Typography>
+
+                {/* Tags */}
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {tags.map((tag) => (
+                        <Chip
+                            key={tag.label}
+                            label={tag.label}
+                            size="small"
+                            sx={{
+                                height: 20,
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                backgroundColor: tag.color,
+                                color: tag.textColor,
+                                borderRadius: '4px',
+                            }}
+                        />
+                    ))}
+                </Box>
 
                 {/* Delete Button (visible on hover) */}
                 <IconButton
@@ -135,7 +185,7 @@ export default function NoteRow({
                         },
                     }}
                 >
-                    <DeleteRoundedIcon sx={{ fontSize: '1.2rem' }} />
+                    <DeleteOutlineOutlinedIcon fontSize="small" />
                 </IconButton>
             </Box>
         </Box>

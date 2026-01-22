@@ -7,8 +7,8 @@
 
 import { useRef } from 'react';
 import { Typography, Box } from '@mui/material';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
+import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
@@ -55,7 +55,7 @@ export default function SaveStatus({
         >
             {error ? (
                 <>
-                    <ErrorOutlineRoundedIcon sx={{ fontSize: '0.8rem', color: 'error.main' }} />
+                    <ErrorOutlineOutlinedIcon sx={{ fontSize: '0.8rem', color: 'error.main' }} />
                     <Typography variant="caption" sx={{ color: 'error.main', fontSize: '0.7rem' }}>
                         Error saving
                     </Typography>
@@ -66,7 +66,7 @@ export default function SaveStatus({
                 </Typography>
             ) : lastSavedAt ? (
                 <Box ref={savedRef} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <CheckRoundedIcon sx={{ fontSize: '0.8rem', color: 'success.main', opacity: 0.6 }} />
+                    <DoneOutlinedIcon sx={{ fontSize: '0.8rem', color: 'success.main', opacity: 0.6 }} />
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', opacity: 0.6 }}>
                         Saved
                     </Typography>
