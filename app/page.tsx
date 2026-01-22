@@ -58,6 +58,7 @@ export default function Home() {
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastFocusedRef = useRef<'title' | 'body'>('body');
 
   // Sidebar Animation
   useGSAP(() => {
@@ -78,9 +79,9 @@ export default function Home() {
 
   const { isListening, isSupported, toggleListening, stopListening, interimText } = useVoiceCapture({
     onResult: (text, isFinal) => {
-      console.log('Voice Result:', { text, isFinal });
       if (isFinal) {
-        setBody((prev: string) => {
+        const setTarget = lastFocusedRef.current === 'title' ? setTitle : setBody;
+        setTarget((prev: string) => {
           const separator = prev.length > 0 && !prev.endsWith(' ') && !prev.endsWith('\n') ? ' ' : '';
           return prev + separator + text;
         });
@@ -415,6 +416,7 @@ export default function Home() {
                   component="input"
                   value={title}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                  onFocus={() => { lastFocusedRef.current = 'title'; }}
                   placeholder="Untitled"
                   sx={{
                     width: '100%',
@@ -440,6 +442,7 @@ export default function Home() {
                 component="textarea"
                 value={body}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBody(e.target.value)}
+                onFocus={() => { lastFocusedRef.current = 'body'; }}
                 placeholder="Start typing..."
                 autoFocus
                 sx={{
