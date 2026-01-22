@@ -53,7 +53,19 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions = {}) {
     const { onResult, onError, onEnd } = options;
     const [isListening, setIsListening] = useState(false);
     const [isSupported, setIsSupported] = useState(false);
+    const [interimText, setInterimText] = useState('');
     const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+    // Keep handlers in refs to avoid re-initializing recognition on Every render
+    const onResultRef = useRef(onResult);
+    const onErrorRef = useRef(onError);
+    const onEndRef = useRef(onEnd);
+
+    useEffect(() => {
+        onResultRef.current = onResult;
+        onErrorRef.current = onError;
+        onEndRef.current = onEnd;
+    }, [onResult, onError, onEnd]);
 
     // Check support on mount and initialize
     useEffect(() => {
@@ -64,8 +76,7 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions = {}) {
         const SpeechRecognitionConstructor = win.SpeechRecognition || win.webkitSpeechRecognition;
 
         if (SpeechRecognitionConstructor) {
-            // Use a slight delay or just set it; the warning is often overzealous
-            // but we can avoid "synchronous setup" by doing it in the next tick
+            // Use a slight delay to avoid "synchronous setup" warnings
             const timer = setTimeout(() => {
                 setIsSupported(true);
             }, 0);
@@ -87,22 +98,26 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions = {}) {
                     }
                 }
 
-                if (finalTranscript && onResult) {
-                    onResult(finalTranscript, true);
-                } else if (interimTranscript && onResult) {
-                    onResult(interimTranscript, false);
+                setInterimText(interimTranscript);
+
+                if (finalTranscript && onResultRef.current) {
+                    onResultRef.current(finalTranscript, true);
+                } else if (interimTranscript && onResultRef.current) {
+                    onResultRef.current(interimTranscript, false);
                 }
             };
 
             recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
                 console.error('Speech recognition error:', event.error);
-                if (onError) onError(event.error);
+                if (onErrorRef.current) onErrorRef.current(event.error);
                 setIsListening(false);
+                setInterimText('');
             };
 
             recognition.onend = () => {
                 setIsListening(false);
-                if (onEnd) onEnd();
+                setInterimText('');
+                if (onEndRef.current) onEndRef.current();
             };
 
             recognitionRef.current = recognition;
@@ -114,24 +129,30 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions = {}) {
                 }
             };
         }
-    }, [onResult, onError, onEnd]);
+    }, []);
 
     const startListening = useCallback(() => {
         if (recognitionRef.current && !isListening) {
             try {
                 recognitionRef.current.start();
                 setIsListening(true);
+                setInterimText('');
             } catch (error) {
                 console.error('Failed to start speech recognition:', error);
-                if (onError) onError('Failed to start');
+                if (onErrorRef.current) onErrorRef.current('Failed to start');
             }
         }
-    }, [isListening, onError]);
+    }, [isListening]);
 
     const stopListening = useCallback(() => {
         if (recognitionRef.current && isListening) {
-            recognitionRef.current.stop();
+            try {
+                recognitionRef.current.stop();
+            } catch (error) {
+                console.error('Failed to stop speech recognition:', error);
+            }
             setIsListening(false);
+            setInterimText('');
         }
     }, [isListening]);
 
@@ -146,6 +167,7 @@ export function useVoiceCapture(options: UseVoiceCaptureOptions = {}) {
     return {
         isListening,
         isSupported,
+        interimText,
         startListening,
         stopListening,
         toggleListening

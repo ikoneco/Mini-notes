@@ -76,8 +76,9 @@ export default function Home() {
     );
   }, { dependencies: [view], scope: containerRef });
 
-  const { isListening, isSupported, toggleListening, stopListening } = useVoiceCapture({
+  const { isListening, isSupported, toggleListening, stopListening, interimText } = useVoiceCapture({
     onResult: (text, isFinal) => {
+      console.log('Voice Result:', { text, isFinal });
       if (isFinal) {
         setBody((prev: string) => {
           const separator = prev.length > 0 && !prev.endsWith(' ') && !prev.endsWith('\n') ? ' ' : '';
@@ -86,6 +87,7 @@ export default function Home() {
       }
     },
     onError: (err) => {
+      console.error('Voice Error:', err);
       setVoiceError(err === 'not-allowed' ? 'Microphone permission denied' : 'Speech recognition error');
       setTimeout(() => setVoiceError(null), 3000);
     }
@@ -328,20 +330,27 @@ export default function Home() {
               </Typography>
             )}
             {isSupported && view === 'editor' && (
-              <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
-                <IconButton
-                  onClick={toggleListening}
-                  size="small"
-                  className="voice-pulse"
-                  sx={{
-                    color: isListening ? 'error.main' : 'text.secondary',
-                    bgcolor: isListening ? 'error.lighter' : 'transparent',
-                    '&:hover': { bgcolor: isListening ? 'error.lighter' : 'action.hover' }
-                  }}
-                >
-                  {isListening ? <MicIcon fontSize="small" /> : <MicNoneIcon fontSize="small" />}
-                </IconButton>
-              </Tooltip>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {interimText && (
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {interimText}...
+                  </Typography>
+                )}
+                <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
+                  <IconButton
+                    onClick={toggleListening}
+                    size="small"
+                    className="voice-pulse"
+                    sx={{
+                      color: isListening ? 'error.main' : 'text.secondary',
+                      bgcolor: isListening ? 'rgba(211, 47, 47, 0.1)' : 'transparent',
+                      '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.2)' : 'rgba(0,0,0,0.04)' }
+                    }}
+                  >
+                    {isListening ? <MicIcon fontSize="small" /> : <MicNoneIcon fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
+              </Box>
             )}
             <Button
               size="small"
