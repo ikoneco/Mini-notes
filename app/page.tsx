@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Box, IconButton, Typography, Button, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -57,17 +57,19 @@ export default function Home() {
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(280);
+  const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<'title' | 'body'>('body');
 
   // Sidebar Animation
   useGSAP(() => {
     gsap.to('.sidebar-container', {
-      width: isNotesListOpen ? 320 : 0,
+      width: isNotesListOpen ? sidebarWidth : 0,
       duration: 0.4,
       ease: 'power3.inOut'
     });
-  }, { dependencies: [isNotesListOpen], scope: containerRef });
+  }, { dependencies: [isNotesListOpen, sidebarWidth], scope: containerRef });
 
   // View Transition Animation
   useGSAP(() => {
@@ -136,6 +138,38 @@ export default function Home() {
     };
     init();
   }, []);
+
+  // Sidebar Resize Handlers
+  const startResizing = useCallback(() => {
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = mouseMoveEvent.clientX;
+      if (newWidth >= 180 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
 
   const [title, setTitle, body, setBody, autosaveState, cancelSave] = useAutosave(
     lastNote?.body || '',
@@ -248,13 +282,14 @@ export default function Home() {
       <Box
         className="sidebar-container"
         sx={{
-          width: isNotesListOpen ? 320 : 0,
+          width: isNotesListOpen ? sidebarWidth : 0,
           borderRight: isNotesListOpen ? '1px solid' : 'none',
           borderColor: 'divider',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: 'background.surface',
+          position: 'relative',
         }}
       >
         <NotesListLayer
@@ -273,6 +308,24 @@ export default function Home() {
           selectedNoteId={lastNote?.id || null}
         />
       </Box>
+
+      {/* Resize Handle */}
+      {isNotesListOpen && (
+        <Box
+          onMouseDown={startResizing}
+          sx={{
+            width: '4px',
+            height: '100%',
+            cursor: 'col-resize',
+            bgcolor: isResizing ? 'primary.main' : 'transparent',
+            zIndex: 10,
+            transition: 'background-color 0.2s',
+            '&:hover': { bgcolor: 'primary.light' },
+            ml: '-2px',
+            mr: '-2px'
+          }}
+        />
+      )}
 
       {/* Main Content Area */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -413,11 +466,21 @@ export default function Home() {
                   {displayEmoji}
                 </Typography>
                 <Box
-                  component="input"
+                  component="textarea"
                   value={title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-                  onFocus={() => { lastFocusedRef.current = 'title'; }}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                    setTitle(e.target.value);
+                    // Single-line auto-grow logic for textarea
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+                    lastFocusedRef.current = 'title';
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   placeholder="Untitled"
+                  rows={1}
                   sx={{
                     width: '100%',
                     border: 'none',
@@ -430,6 +493,10 @@ export default function Home() {
                     color: 'text.primary',
                     mb: 1,
                     fontFamily: 'inherit',
+                    resize: 'none',
+                    overflow: 'hidden',
+                    display: 'block',
+                    p: 0,
                     '&::placeholder': {
                       opacity: 0.3
                     }
