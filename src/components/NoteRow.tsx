@@ -9,8 +9,8 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import { DocIcon } from './DocIcon';
 import { Note } from '../lib/domain/types';
 
 export interface NoteRowProps {
@@ -66,11 +66,11 @@ export default function NoteRow({
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: 1.25,
-                px: 1.5,
+                py: 1.75,
+                px: 2,
                 cursor: 'pointer',
-                borderRadius: '6px',
-                mb: 0.25,
+                borderRadius: '8px',
+                mb: 0.5,
                 transition: 'all 0.1s ease-out',
                 backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
                 '&:hover': {
@@ -81,8 +81,10 @@ export default function NoteRow({
                 },
             }}
         >
-            {/* Minimal File Icon */}
-            <InsertDriveFileOutlinedIcon sx={{ fontSize: '1.1rem', mr: 1.5, color: isSelected ? 'text.primary' : 'text.muted', flexShrink: 0 }} />
+            {/* Minimal High-End Icon */}
+            <Box sx={{ mr: 2.5, display: 'flex', color: isSelected ? 'text.primary' : 'text.muted' }}>
+                <DocIcon size={18} opacity={isSelected ? 0.6 : 0.3} />
+            </Box>
 
             {/* Title & Snippet */}
             <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
@@ -109,7 +111,7 @@ export default function NoteRow({
                         color: 'text.muted',
                         whiteSpace: 'nowrap',
                         fontSize: '0.75rem',
-                        opacity: 0.8
+                        opacity: 0.6
                     }}
                 >
                     {formattedDate}
@@ -133,7 +135,7 @@ export default function NoteRow({
                         },
                     }}
                 >
-                    <DeleteIcon fontSize="small" />
+                    <DeleteRoundedIcon sx={{ fontSize: '1.2rem' }} />
                 </IconButton>
             </Box>
         </Box>
