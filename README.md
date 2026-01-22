@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Minimal Notes
 
-## Getting Started
+A radically minimalist personal note app that makes capture and recall obvious, fast, and calm, with optional voice-to-text input.
 
-First, run the development server:
+## Quickstart
+
+### Prerequisites
+
+- Node.js 20.x LTS
+- pnpm 9.x
+
+### Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Run locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-## Learn More
+## Development
 
-To learn more about Next.js, take a look at the following resources:
+### Lint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm lint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Format
 
-## Deploy on Vercel
+```bash
+pnpm format
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Typecheck
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm typecheck
+```
+
+### Tests
+
+```bash
+pnpm test
+```
+
+Run single test:
+
+```bash
+pnpm test -- <pattern>
+```
+
+### Build
+
+```bash
+pnpm build
+```
+
+Production run:
+
+```bash
+pnpm start
+```
+
+## Project Structure
+
+- `app/` - Next.js app directory (routes)
+- `src/components/` - UI components (Editor, NotesListLayer, NoteRow, Toast)
+- `src/lib/domain/` - Note model, derivations, autosave logic
+- `src/lib/infra/` - Storage adapter (IndexedDB), speech adapter
+- `src/lib/ui/` - View models and hooks that bridge domain to UI
+- `src/theme/` - MUI theme, tokens
+
+## Documentation
+
+- [PRD.md](PRD.md) - Product requirements
+- [Design.md](Design.md) - UI/UX specifications
+- [Plan.md](Plan.md) - Execution plan and milestones
+- [Tasks.md](Tasks.md) - Executable backlog
+- [AGENTS.md](AGENTS.md) - Agent workflow and quality rules
+
+## License
+
+MIT
