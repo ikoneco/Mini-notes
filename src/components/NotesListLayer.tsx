@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { deleteNote } from '../lib/infra/notesStore';
 import NoteRow from './NoteRow';
 import { Note } from '../lib/domain/types';
@@ -75,26 +74,33 @@ export default function NotesListLayer(props: NotesListLayerProps) {
     }, { dependencies: [open, filteredNotes.length], scope: containerRef });
 
     return (
-        <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+        <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#F9F9F9', borderRight: '1px solid', borderColor: 'divider' }}>
             <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
-                            <Box component="span" sx={{ mr: 1, fontSize: '1rem' }}>📄</Box>
-                            All Docs
-                        </Typography>
-                        <KeyboardArrowDownIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '0.7rem',
+                            color: 'text.secondary',
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                        }}
+                    >
+                        Notes
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton onClick={onNewNote} aria-label="New Note" size="small" sx={{ color: 'text.secondary' }}>
+                            <Box sx={{ fontSize: '1.2rem', lineHeight: 1 }}>+</Box>
+                        </IconButton>
+                        <IconButton onClick={onClose} aria-label="Close" size="small" sx={{ color: 'text.secondary' }}>
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
                     </Box>
-                    <IconButton onClick={onNewNote} aria-label="New Note" size="small" sx={{ ml: 1 }}>
-                        <Box sx={{ fontSize: '1.2rem', lineHeight: 1 }}>+</Box>
-                    </IconButton>
                 </Box>
-                <IconButton onClick={onClose} aria-label="Close" size="small">
-                    <CloseIcon fontSize="small" />
-                </IconButton>
             </Box>
 
-            <Box sx={{ px: 2, mb: 2 }}>
+            <Box sx={{ px: 2, mb: 1, mt: 0.5 }}>
                 <TextField
                     placeholder="Search docs…"
                     variant="standard"
@@ -106,15 +112,20 @@ export default function NotesListLayer(props: NotesListLayerProps) {
                         disableUnderline: true,
                         startAdornment: (
                             <InputAdornment position="start">
-                                <SearchIcon sx={{ fontSize: '1rem', color: 'text.muted' }} />
+                                <SearchIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', opacity: 0.5 }} />
                             </InputAdornment>
                         ),
                         sx: {
                             fontSize: '0.85rem',
-                            bgcolor: 'rgba(0, 0, 0, 0.03)',
+                            bgcolor: 'rgba(0, 0, 0, 0.04)',
                             px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
+                            py: 0.4,
+                            borderRadius: '6px',
+                            '&:focus-within': {
+                                bgcolor: 'rgba(0, 0, 0, 0.01)',
+                                boxShadow: '0 0 0 1px rgba(0,0,0,0.1)'
+                            },
+                            transition: 'all 0.2s ease'
                         }
                     }}
                 />

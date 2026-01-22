@@ -95,15 +95,16 @@ export default function NoteRow({
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: 1.5,
-                px: 2,
+                py: 1.2,
+                px: 1.5,
                 cursor: 'pointer',
-                borderRadius: 1,
-                mb: 0.5,
-                transition: 'all 0.12s ease-out',
-                backgroundColor: isSelected ? 'action.selected' : 'transparent',
+                borderRadius: '6px',
+                mx: 1,
+                mb: 0.2,
+                transition: 'all 0.1s ease-out',
+                backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'action.selected' : 'rgba(0, 0, 0, 0.02)',
+                    backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.03)',
                     '& .delete-button': {
                         opacity: 1,
                     }
@@ -115,19 +116,16 @@ export default function NoteRow({
                 {emoji}
             </Typography>
 
-            {/* Title & Snippet */}
-            <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
+            {/* Title */}
+            <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
                 <Typography
                     sx={{
-                        fontWeight: 500,
-                        fontSize: '0.95rem',
-                        color: 'text.primary',
+                        fontWeight: isSelected ? 600 : 400,
+                        fontSize: '0.9rem',
+                        color: isSelected ? 'text.primary' : 'text.secondary',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        borderBottom: isSelected ? '1px solid transparent' : '1px solid rgba(0,0,0,0.1)',
-                        display: 'inline-block',
-                        maxWidth: '100%',
                     }}
                 >
                     {note.title || 'Untitled'}
@@ -135,14 +133,15 @@ export default function NoteRow({
             </Box>
 
             {/* Metadata Section (Right side) */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                 {/* Date */}
                 <Typography
                     variant="caption"
                     sx={{
-                        color: 'text.secondary',
+                        color: 'text.disabled',
                         whiteSpace: 'nowrap',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem',
+                        mr: 0.5
                     }}
                 >
                     {formattedDate}
