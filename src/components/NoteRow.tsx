@@ -82,6 +82,7 @@ export default function NoteRow({
 
     return (
         <Box
+            className="note-row"
             onClick={() => onSelect(note)}
             sx={{
                 display: 'flex',

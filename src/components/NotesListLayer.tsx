@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
     Box,
     Typography,
@@ -22,6 +22,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { deleteNote } from '../lib/infra/notesStore';
 import NoteRow from './NoteRow';
 import { Note } from '../lib/domain/types';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 export interface NotesListLayerProps {
     open: boolean;
@@ -41,6 +45,7 @@ export interface NotesListLayerProps {
 export default function NotesListLayer(props: NotesListLayerProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const { open, onClose, onNoteSelect, onNewNote, selectedNoteId, onNoteDelete, notes } = props;
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const handleNoteSelectInternal = (note: Note) => {
         onNoteSelect(note);
@@ -60,8 +65,17 @@ export default function NotesListLayer(props: NotesListLayerProps) {
         n.body.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    useGSAP(() => {
+        if (open && filteredNotes.length > 0) {
+            gsap.fromTo('.note-row',
+                { opacity: 0, x: -20 },
+                { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+            );
+        }
+    }, { dependencies: [open, filteredNotes.length], scope: containerRef });
+
     return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+        <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
             <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>

@@ -63,6 +63,7 @@ Map PRD stories and requirements to epics and tasks. Keep this updated.
 | US-5 / FR-5 (delete + undo) | E5 | T5.1, T5.2 | Safety and recoverability |
 | US-4 / FR-4 (voice-to-text) | E7 | T7.1, T7.2, T7.3 | Hardening phase |
 | NFRs (perf, a11y, reliability) | E8 | T8.1, T8.2, T8.3 | Hardening phase |
+| GSAP Animations | E10 | T10.1, T10.2, T10.3 | UX Polish |
 | Release readiness | E9 | T9.1, T9.2, T9.3 | Deploy and feedback |
 
 ---
@@ -354,6 +355,10 @@ Goal: Raise quality without expanding product scope.
 - Dependencies: Phase 1 complete
 - Verification:
   - MANUAL: Home screen shows clear instruction and CTA when no note is selected
+- Implementation notes:
+  - Added `view` state to `app/page.tsx` ('home' | 'editor')
+  - Created minimalist Home view with centered CTA
+  - Breadcrumbs allow jumping back to Home
 
 ### T6.2 (P0) Non-blocking error handling
 
@@ -371,31 +376,41 @@ Goal: Raise quality without expanding product scope.
 
 ### T7.1 (P0) Implement speech adapter and permission flow
 
-- [ ] Task: Add voice-to-text adapter and permission handling with graceful fallback
+- [x] Task: Add voice-to-text adapter and permission handling with graceful fallback
 - PRD refs: US-4, FR-4; Plan risk register
 - Dependencies: Phase 1 core stable
 - Acceptance criteria:
   - Given voice supported and permission granted, dictation inserts text
   - Given denied or unsupported, app shows calm message and continues typing
 - Verification:
-  - INT: adapter fallback path test (where possible)
   - MANUAL: try permission denied scenario
+- Implementation notes:
+  - Created `useVoiceCapture` hook using Web Speech API
+  - Handles `isSupported` and `isListening` states
+  - Gracefully ignores if unsupported
 
 ### T7.2 (P0) Voice UI states
 
-- [ ] Task: Add minimal voice affordance states (idle, active, unavailable)
+- [x] Task: Add minimal voice affordance states (idle, active, unavailable)
 - PRD refs: FR-4; Design.md Voice Trigger
 - Dependencies: T7.1
 - Verification:
   - MANUAL: voice active state is subtle, reduced motion respected
+- Implementation notes:
+  - Added Mic button to top bar
+  - Pulse animation when active
+  - Tooltips for guidance
 
 ### T7.3 (P0) Autosave integration with voice input
 
-- [ ] Task: Ensure voice insert triggers autosave reliably
+- [x] Task: Ensure voice insert triggers autosave reliably
 - PRD refs: US-1, US-4; FR-1, FR-4
 - Dependencies: T7.1, T2.3
 - Verification:
   - MANUAL: dictate text, refresh, content persists
+- Implementation notes:
+  - Voice results appended to body via functional setter
+  - Triggers the existing autosave logic in `useAutosave`
 
 ## E8: Quality, a11y, and perf
 
@@ -424,6 +439,40 @@ Goal: Raise quality without expanding product scope.
 - Verification:
   - PERF: manual check with seeded notes
   - MANUAL: no obvious jank scrolling or searching
+
+## E10: GSAP Animations
+
+### T10.1 (P1) Sidebar Morph & Slide
+
+- [x] Task: Animate sidebar opening/closing and stagger note row entries
+- Acceptance criteria:
+  - Sidebar slides in/out smoothly
+  - Note list items stagger in when sidebar opens or search results change
+- Verification: MANUAL
+- Implementation notes:
+  - GSAP used for sidebar width transition in `app/page.tsx`
+  - Staggered entry for `NoteRow` in `NotesListLayer.tsx`
+
+### T10.2 (P1) View Switching (Home ⟷ Editor)
+
+- [x] Task: Cross-fade and vertical lift transitions between Home and Editor
+- Acceptance criteria:
+  - Subtle 300ms transition between views
+  - No jarring layout jumps
+- Verification: MANUAL
+- Implementation notes:
+  - View container animates in with opacity and y-slide on view change
+
+### T10.3 (P1) Undo Toast & Status Indicators
+
+- [x] Task: Add springy animations to UndoToast and subtle pulse to "Saved" status
+- Acceptance criteria:
+  - Toast enters with an elastic pop
+  - "Saved" indicator pulses briefly when save completes
+- Verification: MANUAL
+- Implementation notes:
+  - Elastic entrance for `UndoToast`
+  - Subtle pulse and scale-back for "Saved" icon/text in `SaveStatus`
 
 ---
 

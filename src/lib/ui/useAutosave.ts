@@ -40,17 +40,17 @@ export function useAutosave(
     options: UseAutosaveOptions = {}
 ): [
         string,
-        (title: string) => void,
+        (title: string | ((prev: string) => string)) => void,
         string,
-        (body: string) => void,
+        (body: string | ((prev: string) => string)) => void,
         AutosaveState,
         () => void // cancelSave
     ] {
     const { debounceMs = 1000, onSaveComplete, onError } = options;
 
     // Editor state
-    const [title, setTitle] = useState(initialTitle);
-    const [body, setBody] = useState(initialContent);
+    const [title, _setTitle] = useState(initialTitle);
+    const [body, _setBody] = useState(initialContent);
 
     // Autosave state
     const [autosaveState, setAutosaveState] = useState<AutosaveState>({
@@ -65,6 +65,23 @@ export function useAutosave(
     const pendingBodyRef = useRef<string>(body);
     const currentNoteIdRef = useRef<string | null>(noteId);
     const createdAtRef = useRef<number | null>(initialCreatedAt);
+
+    // Setters that update refs and state
+    const setTitle = useCallback((value: string | ((prev: string) => string)) => {
+        _setTitle(prev => {
+            const next = typeof value === 'function' ? value(prev) : value;
+            pendingTitleRef.current = next;
+            return next;
+        });
+    }, []);
+
+    const setBody = useCallback((value: string | ((prev: string) => string)) => {
+        _setBody(prev => {
+            const next = typeof value === 'function' ? value(prev) : value;
+            pendingBodyRef.current = next;
+            return next;
+        });
+    }, []);
 
     // Sync state with refs manually to ensure they're up to date for the effect
     useEffect(() => {

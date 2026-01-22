@@ -25,14 +25,15 @@ The Minimal Notes project is approximately **75% complete**. Phase 0 (Foundation
 - ✅ US-1, US-2, US-3 implemented (capture, synced sidebar, search, open note)
 - ✅ Autosave persistence works (independent title and body)
 - ✅ Home / Welcome screen implemented for clear entry
-- ✅ stable sorting by creation date
+- ✅ Stable sorting by creation date
 - ✅ Delete functionality works
-- ⏳ Delete with undo (Next Task)
+- ✅ Delete with undo (UndoToast implemented)
 
 ### M2: Hardening [-] IN PROGRESS
 
+- ⏳ GSAP animations and transitions (Sidebar, Home/Editor transition, NoteRow micro-interactions)
 - ⏳ Voice-to-text integration (E7)
-- ⏳ Error states recoverable and non-blocking (Refined in autosave)
+- ⏳ Error states recoverable and non-blocking
 - ⏳ A11y baseline met
 - ⏳ Perf checks acceptable
 

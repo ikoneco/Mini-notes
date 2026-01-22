@@ -5,19 +5,26 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, IconButton, Typography, Button } from '@mui/material';
+import { useEffect, useState, useRef } from 'react';
+import { Box, IconButton, Typography, Button, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import MicIcon from '@mui/icons-material/Mic';
+import MicNoneIcon from '@mui/icons-material/MicNone';
 
 import { listNotes } from '../src/lib/infra/notesStore';
 import { createOrUpdateNote } from '../src/lib/infra/notesStore';
 import { useAutosave } from '../src/lib/ui/useAutosave';
+import { useVoiceCapture } from '../src/lib/ui/useVoiceCapture';
 import { getLastNote } from '../src/lib/infra/lastNote';
 import SaveStatus from '../src/components/SaveStatus';
 import NotesListLayer from '../src/components/NotesListLayer';
 import UndoToast from '../src/components/UndoToast';
 import { Note } from '../src/lib/domain/types';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 /**
  * Mock helper to get an emoji based on note title
@@ -48,6 +55,52 @@ export default function Home() {
   const [isNotesListOpen, setIsNotesListOpen] = useState(true);
   const [deletedNote, setDeletedNote] = useState<Note | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sidebar Animation
+  useGSAP(() => {
+    gsap.to('.sidebar-container', {
+      width: isNotesListOpen ? 320 : 0,
+      duration: 0.4,
+      ease: 'power3.inOut'
+    });
+  }, { dependencies: [isNotesListOpen], scope: containerRef });
+
+  // View Transition Animation
+  useGSAP(() => {
+    gsap.fromTo('.view-transition-container',
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
+    );
+  }, { dependencies: [view], scope: containerRef });
+
+  const { isListening, isSupported, toggleListening } = useVoiceCapture({
+    onResult: (text, isFinal) => {
+      if (isFinal) {
+        setBody((prev: string) => {
+          const separator = prev.length > 0 && !prev.endsWith(' ') && !prev.endsWith('\n') ? ' ' : '';
+          return prev + separator + text;
+        });
+      }
+    }
+  });
+
+  // Voice Pulse Animation
+  useGSAP(() => {
+    if (isListening) {
+      gsap.to('.voice-pulse', {
+        scale: 1.2,
+        opacity: 0.6,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+    } else {
+      gsap.set('.voice-pulse', { scale: 1, opacity: 1 });
+      gsap.killTweensOf('.voice-pulse');
+    }
+  }, { dependencies: [isListening], scope: containerRef });
 
   const refreshNotes = async () => {
     try {
@@ -172,15 +225,15 @@ export default function Home() {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
+    <Box ref={containerRef} sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
 
       {/* Sidebar - Matches Screenshot 1/0 look */}
       <Box
+        className="sidebar-container"
         sx={{
           width: isNotesListOpen ? 320 : 0,
           borderRight: isNotesListOpen ? '1px solid' : 'none',
           borderColor: 'divider',
-          transition: 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -255,6 +308,22 @@ export default function Home() {
 
           {/* Right Side: Primary Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isSupported && view === 'editor' && (
+              <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
+                <IconButton
+                  onClick={toggleListening}
+                  size="small"
+                  className="voice-pulse"
+                  sx={{
+                    color: isListening ? 'error.main' : 'text.secondary',
+                    bgcolor: isListening ? 'error.lighter' : 'transparent',
+                    '&:hover': { bgcolor: isListening ? 'error.lighter' : 'action.hover' }
+                  }}
+                >
+                  {isListening ? <MicIcon fontSize="small" /> : <MicNoneIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+            )}
             <Button
               size="small"
               variant="contained"
@@ -277,7 +346,7 @@ export default function Home() {
         </Box>
 
         {/* Scrollable Content Area */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: 4, display: 'flex', justifyContent: 'center', alignItems: view === 'home' ? 'center' : 'flex-start' }}>
+        <Box className="view-transition-container" sx={{ flex: 1, overflowY: 'auto', p: 4, display: 'flex', justifyContent: 'center', alignItems: view === 'home' ? 'center' : 'flex-start' }}>
           {view === 'home' ? (
             <Box sx={{ maxWidth: 400, textAlign: 'center', mb: 8 }}>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'text.primary', letterSpacing: '-0.02em' }}>
