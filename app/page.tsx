@@ -62,14 +62,18 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<'title' | 'body'>('body');
 
-  // Sidebar Animation
+  // Sidebar Animation - Only for toggle
   useGSAP(() => {
+    // Skip animation on mount or if we are just resizing
+    if (isResizing) return;
+
     gsap.to('.sidebar-container', {
       width: isNotesListOpen ? sidebarWidth : 0,
       duration: 0.4,
-      ease: 'power3.inOut'
+      ease: 'power3.inOut',
+      overwrite: 'auto'
     });
-  }, { dependencies: [isNotesListOpen, sidebarWidth], scope: containerRef });
+  }, { dependencies: [isNotesListOpen], scope: containerRef });
 
   // View Transition Animation
   useGSAP(() => {
@@ -150,10 +154,13 @@ export default function Home() {
 
   const resize = useCallback((mouseMoveEvent: MouseEvent) => {
     if (isResizing) {
-      const newWidth = mouseMoveEvent.clientX;
-      if (newWidth >= 180 && newWidth <= 600) {
-        setSidebarWidth(newWidth);
-      }
+      // Use requestAnimationFrame for smoother performance
+      requestAnimationFrame(() => {
+        const newWidth = mouseMoveEvent.clientX;
+        if (newWidth >= 180 && newWidth <= 600) {
+          setSidebarWidth(newWidth);
+        }
+      });
     }
   }, [isResizing]);
 
@@ -276,7 +283,17 @@ export default function Home() {
   }
 
   return (
-    <Box ref={containerRef} sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
+    <Box
+      ref={containerRef}
+      sx={{
+        display: 'flex',
+        height: '100vh',
+        bgcolor: 'background.default',
+        overflow: 'hidden',
+        userSelect: isResizing ? 'none' : 'auto',
+        cursor: isResizing ? 'col-resize' : 'default'
+      }}
+    >
 
       {/* Sidebar - Matches Screenshot 1/0 look */}
       <Box
@@ -290,6 +307,9 @@ export default function Home() {
           flexDirection: 'column',
           bgcolor: 'background.surface',
           position: 'relative',
+          // Disable transition during resizing for instant response
+          transition: isResizing ? 'none' : undefined,
+          flexShrink: 0
         }}
       >
         <NotesListLayer
@@ -314,15 +334,29 @@ export default function Home() {
         <Box
           onMouseDown={startResizing}
           sx={{
-            width: '4px',
+            width: '6px',
             height: '100%',
             cursor: 'col-resize',
             bgcolor: isResizing ? 'primary.main' : 'transparent',
-            zIndex: 10,
-            transition: 'background-color 0.2s',
-            '&:hover': { bgcolor: 'primary.light' },
-            ml: '-2px',
-            mr: '-2px'
+            zIndex: 100,
+            transition: 'background-color 0.1s',
+            '&:hover': {
+              bgcolor: 'primary.light',
+              width: '6px'
+            },
+            ml: '-3px',
+            mr: '-3px',
+            position: 'relative',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              bottom: 0,
+              width: '1px',
+              bgcolor: 'divider',
+              opacity: isResizing ? 0 : 1
+            }
           }}
         />
       )}
