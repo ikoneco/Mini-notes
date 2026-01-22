@@ -111,7 +111,7 @@ export default function NotesListLayer(props: NotesListLayerProps) {
                         ),
                         sx: {
                             fontSize: '0.85rem',
-                            bgcolor: 'action.hover',
+                            bgcolor: 'rgba(0, 0, 0, 0.03)',
                             px: 1.5,
                             py: 0.5,
                             borderRadius: 1,

@@ -103,7 +103,7 @@ export default function NoteRow({
                 transition: 'all 0.12s ease-out',
                 backgroundColor: isSelected ? 'action.selected' : 'transparent',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'action.selected' : 'action.hover',
+                    backgroundColor: isSelected ? 'action.selected' : 'rgba(0, 0, 0, 0.02)',
                     '& .delete-button': {
                         opacity: 1,
                     }

@@ -339,10 +339,9 @@ export default function Home() {
             cursor: 'col-resize',
             bgcolor: isResizing ? 'primary.main' : 'transparent',
             zIndex: 100,
-            transition: 'background-color 0.1s',
+            transition: 'background-color 0.4s ease',
             '&:hover': {
-              bgcolor: 'primary.light',
-              width: '6px'
+              bgcolor: 'rgba(0, 0, 0, 0.02)',
             },
             ml: '-3px',
             mr: '-3px',
@@ -431,8 +430,8 @@ export default function Home() {
                     className="voice-pulse"
                     sx={{
                       color: isListening ? 'error.main' : 'text.secondary',
-                      bgcolor: isListening ? 'rgba(211, 47, 47, 0.1)' : 'transparent',
-                      '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.2)' : 'rgba(0,0,0,0.04)' }
+                      bgcolor: isListening ? 'rgba(211, 47, 47, 0.05)' : 'transparent',
+                      '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.1)' : 'rgba(0,0,0,0.03)' }
                     }}
                   >
                     {isListening ? <MicIcon fontSize="small" /> : <MicNoneIcon fontSize="small" />}
