@@ -98,29 +98,43 @@ export default function NoteRow({
                 py: 1.2,
                 px: 1.5,
                 cursor: 'pointer',
-                borderRadius: '6px',
+                borderRadius: '10px',
                 mx: 1,
-                mb: 0.2,
-                transition: 'all 0.1s ease-out',
-                backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                mb: 0.5,
+                transition: 'all 0.15s ease',
+                backgroundColor: isSelected ? '#F3F4F6' : 'transparent',
+                position: 'relative',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                    backgroundColor: isSelected ? '#F3F4F6' : 'rgba(0, 0, 0, 0.02)',
                     '& .delete-button': {
                         opacity: 1,
                     }
                 },
             }}
         >
+            {/* Color Indicator Bar */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '25%',
+                    bottom: '25%',
+                    width: '3px',
+                    bgcolor: tags[0]?.textColor || '#007AFF',
+                    borderRadius: '0 4px 4px 0',
+                    opacity: 0.8
+                }}
+            />
             {/* Emoji Icon */}
             <Typography sx={{ fontSize: '1.2rem', mr: 2, mt: -0.2 }}>
                 {emoji}
             </Typography>
 
             {/* Title */}
-            <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, ml: 1, mr: 1 }}>
                 <Typography
                     sx={{
-                        fontWeight: isSelected ? 600 : 400,
+                        fontWeight: isSelected ? 600 : 500,
                         fontSize: '0.9rem',
                         color: isSelected ? 'text.primary' : 'text.secondary',
                         overflow: 'hidden',
