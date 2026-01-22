@@ -493,22 +493,11 @@ export default function Home() {
           ) : (
             <Box sx={{ width: '100%', maxWidth: 720, position: 'relative' }}>
 
-              {/* Document Header - Matches Ref Image Title Style */}
-              <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.01em' }}>
-                    {title || "Today's focus"}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                    {body.trim().split(/\s+/).filter(x => x).length} words recorded
-                  </Typography>
-                </Box>
-                <Typography sx={{ fontSize: '3rem', lineHeight: 1 }}>
+              {/* Document Header - Matches Screenshot 2 Large Title */}
+              <Box sx={{ mb: 6 }}>
+                <Typography sx={{ fontSize: '4rem', mb: 2, display: 'block' }}>
                   {displayEmoji}
                 </Typography>
-              </Box>
-
-              <Box sx={{ mb: 4 }}>
                 <Box
                   component="textarea"
                   value={title}
@@ -523,19 +512,19 @@ export default function Home() {
                     e.target.style.height = 'auto';
                     e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
-                  placeholder="Rename note…"
+                  placeholder="Untitled"
                   rows={1}
                   sx={{
                     width: '100%',
                     border: 'none',
                     outline: 'none',
                     bgcolor: 'transparent',
-                    fontWeight: 700,
-                    fontSize: '1.2rem',
-                    letterSpacing: '-0.01em',
-                    color: 'text.secondary',
-                    opacity: 0.6,
-                    mb: 4,
+                    fontWeight: 800,
+                    fontSize: '2.5rem',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.2,
+                    color: 'text.primary',
+                    mb: 1,
                     fontFamily: 'inherit',
                     resize: 'none',
                     overflow: 'hidden',
@@ -558,7 +547,7 @@ export default function Home() {
                 autoFocus
                 sx={{
                   width: '100%',
-                  minHeight: '50vh',
+                  minHeight: '60vh',
                   border: 'none',
                   outline: 'none',
                   resize: 'none',
@@ -567,37 +556,12 @@ export default function Home() {
                   lineHeight: 1.6,
                   color: 'text.primary',
                   bgcolor: 'transparent',
-                  pb: 10,
                   '&::placeholder': {
                     color: 'text.muted',
                     opacity: 0.5,
                   },
                 }}
               />
-
-              {/* Progress Bar inspired by screenshot */}
-              <Box sx={{ mt: 4, pt: 4, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', mb: 1, display: 'block' }}>
-                  Your progress
-                </Typography>
-                <Box sx={{ height: '6px', width: '100%', bgcolor: '#E5E7EB', borderRadius: '10px', position: 'relative', overflow: 'hidden' }}>
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: body.length > 0 ? `${Math.min(100, (body.trim().split(/\s+/).length / 200) * 100)}%` : '0%',
-                      bgcolor: '#10B981', // Emerald green from screenshot
-                      transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                      borderRadius: '10px'
-                    }}
-                  />
-                </Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
-                  Word goal: {body.trim().split(/\s+/).filter(x => x.length > 0).length} / 200 words
-                </Typography>
-              </Box>
 
               {/* Save Status - Subtle Floating or Bottom Style */}
               <Box sx={{ position: 'fixed', bottom: 20, right: 20 }}>

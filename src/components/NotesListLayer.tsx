@@ -13,10 +13,12 @@ import {
     Typography,
     TextField,
     List,
+    IconButton,
     InputAdornment,
-    Button,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { deleteNote } from '../lib/infra/notesStore';
 import NoteRow from './NoteRow';
 import { Note } from '../lib/domain/types';
@@ -42,7 +44,7 @@ export interface NotesListLayerProps {
  */
 export default function NotesListLayer(props: NotesListLayerProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const { open, onNoteSelect, onNewNote, selectedNoteId, onNoteDelete, notes } = props;
+    const { open, onClose, onNoteSelect, onNewNote, selectedNoteId, onNoteDelete, notes } = props;
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleNoteSelectInternal = (note: Note) => {
@@ -73,11 +75,37 @@ export default function NotesListLayer(props: NotesListLayerProps) {
     }, { dependencies: [open, filteredNotes.length], scope: containerRef });
 
     return (
-        <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#FFFFFF', borderRight: '1px solid', borderColor: 'divider' }}>
-            {/* Sidebar Header & Search */}
-            <Box sx={{ p: 2, pb: 1 }}>
+        <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+            <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        cursor: 'pointer',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
+                        transition: 'background-color 0.2s'
+                    }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.85rem', color: 'text.primary', display: 'flex', alignItems: 'center' }}>
+                            All Docs
+                        </Typography>
+                        <KeyboardArrowDownIcon sx={{ fontSize: '1.2rem', color: 'text.muted' }} />
+                    </Box>
+                    <IconButton onClick={onNewNote} aria-label="New Note" size="small" sx={{ ml: 0.5, color: 'text.muted' }}>
+                        <Box component="span" sx={{ fontSize: '1.1rem', fontWeight: 300, mt: -0.2 }}>+</Box>
+                    </IconButton>
+                </Box>
+                <IconButton onClick={onClose} aria-label="Close" size="small" sx={{ color: 'text.muted' }}>
+                    <CloseIcon sx={{ fontSize: '1.1rem' }} />
+                </IconButton>
+            </Box>
+
+            <Box sx={{ px: 2, mb: 2 }}>
                 <TextField
-                    placeholder="Search"
+                    placeholder="Search docs…"
                     variant="standard"
                     size="small"
                     fullWidth
@@ -87,79 +115,23 @@ export default function NotesListLayer(props: NotesListLayerProps) {
                         disableUnderline: true,
                         startAdornment: (
                             <InputAdornment position="start">
-                                <SearchIcon sx={{ fontSize: '1.1rem', color: 'text.secondary', ml: 0.5 }} />
+                                <SearchIcon sx={{ fontSize: '1rem', color: 'text.muted' }} />
                             </InputAdornment>
                         ),
                         sx: {
-                            fontSize: '0.9rem',
-                            bgcolor: '#F3F4F6',
+                            fontSize: '0.82rem',
+                            bgcolor: 'rgba(0, 0, 0, 0.03)',
                             px: 1,
-                            py: 0.8,
-                            borderRadius: '50px',
-                            '& input': {
-                                py: 0.5
+                            py: 0.25,
+                            borderRadius: '6px',
+                            color: 'text.primary',
+                            '& input::placeholder': {
+                                color: 'text.muted',
+                                opacity: 0.8
                             }
                         }
                     }}
-                    sx={{ mb: 2 }}
                 />
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 3 }}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1.5,
-                            px: 1.5,
-                            py: 1,
-                            borderRadius: '8px',
-                            bgcolor: 'rgba(0, 0, 0, 0.05)',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <Typography sx={{ fontSize: '1.1rem' }}>📄</Typography>
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: 'text.primary' }}>
-                            Notes
-                        </Typography>
-                    </Box>
-                </Box>
-
-                <Button
-                    fullWidth
-                    variant="contained"
-                    disableElevation
-                    onClick={onNewNote}
-                    startIcon={<Box sx={{ fontSize: '1.2rem', mr: 0.5, mb: 0.2 }}>+</Box>}
-                    sx={{
-                        bgcolor: '#007AFF', // Vibrant Blue
-                        color: 'white',
-                        borderRadius: '50px',
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        py: 1.2,
-                        fontSize: '0.9rem',
-                        '&:hover': {
-                            bgcolor: '#0062CC',
-                        },
-                        mb: 3
-                    }}
-                >
-                    Create new note
-                </Button>
-
-                <Typography
-                    variant="caption"
-                    sx={{
-                        px: 1.5,
-                        fontWeight: 500,
-                        fontSize: '0.85rem',
-                        color: 'text.secondary',
-                        display: 'block',
-                        mb: 1
-                    }}
-                >
-                    Recent
-                </Typography>
             </Box>
 
             <Box sx={{ flex: 1, overflow: 'hidden', px: 1 }}>
