@@ -7,6 +7,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Box, Typography, IconButton, Chip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Note } from '../lib/domain/types';
@@ -77,8 +78,15 @@ export default function NoteRow({
     onSelect,
     onDelete,
 }: NoteRowProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setMounted(true);
+    }, []);
+
     const emoji = getEmoji(note.title);
     const tags = getTags(note.title);
+    const formattedDate = mounted ? formatDate(note.createdAt) : '';
 
     return (
         <Box
@@ -137,7 +145,7 @@ export default function NoteRow({
                         fontSize: '0.8rem',
                     }}
                 >
-                    {formatDate(note.createdAt)}
+                    {formattedDate}
                 </Typography>
 
                 {/* Tags */}

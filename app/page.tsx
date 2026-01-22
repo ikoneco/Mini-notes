@@ -56,6 +56,7 @@ export default function Home() {
   const [deletedNote, setDeletedNote] = useState<Note | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sidebar Animation
@@ -128,6 +129,7 @@ export default function Home() {
         setView('home');
       }
       setIsLoading(false);
+      setMounted(true);
     };
     init();
   }, []);
@@ -223,6 +225,10 @@ export default function Home() {
       console.error('Failed to restore note:', error);
     }
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   if (isLoading) {
     return (
