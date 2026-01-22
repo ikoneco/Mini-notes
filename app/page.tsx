@@ -55,6 +55,7 @@ export default function Home() {
   const [isNotesListOpen, setIsNotesListOpen] = useState(true);
   const [deletedNote, setDeletedNote] = useState<Note | null>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sidebar Animation
@@ -74,7 +75,7 @@ export default function Home() {
     );
   }, { dependencies: [view], scope: containerRef });
 
-  const { isListening, isSupported, toggleListening } = useVoiceCapture({
+  const { isListening, isSupported, toggleListening, stopListening } = useVoiceCapture({
     onResult: (text, isFinal) => {
       if (isFinal) {
         setBody((prev: string) => {
@@ -82,6 +83,10 @@ export default function Home() {
           return prev + separator + text;
         });
       }
+    },
+    onError: (err) => {
+      setVoiceError(err === 'not-allowed' ? 'Microphone permission denied' : 'Speech recognition error');
+      setTimeout(() => setVoiceError(null), 3000);
     }
   });
 
@@ -152,6 +157,7 @@ export default function Home() {
   const displayEmoji = getEmoji(title);
 
   const handleNoteSelect = (note: Note) => {
+    stopListening();
     setLastNote({
       id: note.id,
       title: note.title,
@@ -164,6 +170,7 @@ export default function Home() {
   };
 
   const handleNewNote = () => {
+    stopListening();
     setLastNote({ id: null, title: '', body: '', createdAt: null });
     setTitle('');
     setBody('');
@@ -171,6 +178,7 @@ export default function Home() {
   };
 
   const handleGoHome = () => {
+    stopListening();
     setView('home');
     setLastNote({ id: null, title: '', body: '', createdAt: null });
     setTitle('');
@@ -308,6 +316,11 @@ export default function Home() {
 
           {/* Right Side: Primary Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {voiceError && (
+              <Typography variant="caption" sx={{ color: 'error.main', mr: 1, fontSize: '0.75rem' }}>
+                {voiceError}
+              </Typography>
+            )}
             {isSupported && view === 'editor' && (
               <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
                 <IconButton
