@@ -6,11 +6,11 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Box, IconButton, Typography, Button, Tooltip } from '@mui/material';
+import { Box, IconButton, Typography, Button } from '@mui/material';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import ShortTextIcon from '@mui/icons-material/ShortText';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 
 import { listNotes } from '../src/lib/infra/notesStore';
 import { createOrUpdateNote } from '../src/lib/infra/notesStore';
@@ -26,21 +26,6 @@ import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(useGSAP);
 
-/**
- * Mock helper to get an emoji based on note title
- */
-function getEmoji(title: string): string {
-  const t = title.toLowerCase();
-  if (t.includes('interview')) return '🤝';
-  if (t.includes('mobile')) return '📱';
-  if (t.includes('stripe') || t.includes('billing')) return '💳';
-  if (t.includes('database')) return '🗄️';
-  if (t.includes('marketing')) return '📈';
-  if (t.includes('analytics') || t.includes('report')) return '📊';
-  if (t.includes('meeting')) return '📝';
-  if (t.includes('onboarding')) return '👋';
-  return '📄';
-}
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -200,8 +185,6 @@ export default function Home() {
     }
   );
 
-  const displayEmoji = getEmoji(title);
-
   const handleNoteSelect = (note: Note) => {
     stopListening();
     setLastNote({
@@ -326,6 +309,9 @@ export default function Home() {
             await refreshNotes();
           }}
           selectedNoteId={lastNote?.id || null}
+          isVoiceSupported={isSupported}
+          isListening={isListening}
+          onToggleListening={toggleListening}
         />
       </Box>
 
@@ -400,63 +386,12 @@ export default function Home() {
               {view === 'editor' && (
                 <>
                   <KeyboardArrowRightIcon sx={{ fontSize: '0.9rem', color: 'text.muted', mx: 0.3 }} />
-                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'flex', alignItems: 'center' }}>
-                    <Box component="span" sx={{ mr: 0.5 }}>{displayEmoji}</Box>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                     {title || 'Untitled'}
                   </Typography>
                 </>
               )}
             </Box>
-          </Box>
-
-          {/* Right Side: Primary Actions */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {voiceError && (
-              <Typography variant="caption" sx={{ color: 'error.main', mr: 1, fontSize: '0.75rem' }}>
-                {voiceError}
-              </Typography>
-            )}
-            {isSupported && view === 'editor' && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {interimText && (
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {interimText}...
-                  </Typography>
-                )}
-                <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
-                  <IconButton
-                    onClick={toggleListening}
-                    size="small"
-                    className="voice-pulse"
-                    sx={{
-                      color: isListening ? 'error.main' : 'text.secondary',
-                      bgcolor: isListening ? 'rgba(211, 47, 47, 0.05)' : 'transparent',
-                      '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.1)' : 'rgba(0,0,0,0.03)' }
-                    }}
-                  >
-                    {isListening ? <MicOutlinedIcon fontSize="small" /> : <MicNoneOutlinedIcon fontSize="small" />}
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
-            <Button
-              size="small"
-              variant="contained"
-              disableElevation
-              onClick={handleNewNote}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                }
-              }}
-            >
-              New Note
-            </Button>
           </Box>
         </Box>
 
@@ -476,6 +411,7 @@ export default function Home() {
                 size="large"
                 disableElevation
                 onClick={handleNewNote}
+                startIcon={<AddOutlinedIcon />}
                 sx={{
                   textTransform: 'none',
                   fontWeight: 600,
@@ -494,10 +430,7 @@ export default function Home() {
             <Box sx={{ width: '100%', maxWidth: 720, position: 'relative' }}>
 
               {/* Document Header - Matches Screenshot 2 Large Title */}
-              <Box sx={{ mb: 6 }}>
-                <Typography sx={{ fontSize: '4rem', mb: 2, display: 'block' }}>
-                  {displayEmoji}
-                </Typography>
+              <Box sx={{ mb: 2 }}>
                 <Box
                   component="textarea"
                   value={title}

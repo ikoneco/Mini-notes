@@ -1,8 +1,5 @@
 /**
  * NotesListLayer component
- * 
- * Progressive disclosure layer for browsing and opening notes without navigating away from editor.
- * Follows Design.md Notes List Layer specification.
  */
 
 'use client';
@@ -15,10 +12,14 @@ import {
     List,
     IconButton,
     InputAdornment,
+    Button,
 } from '@mui/material';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
+import { Tooltip } from '@mui/material';
 import { deleteNote } from '../lib/infra/notesStore';
 import NoteRow from './NoteRow';
 import { Note } from '../lib/domain/types';
@@ -35,16 +36,14 @@ export interface NotesListLayerProps {
     selectedNoteId: string | null;
     onNoteDelete: (noteId: string) => void;
     notes: Note[];
+    isVoiceSupported: boolean;
+    isListening: boolean;
+    onToggleListening: () => void;
 }
 
-/**
- * NotesListLayer component
- * 
- * Provides a sidebar drawer for browsing and selecting notes.
- */
 export default function NotesListLayer(props: NotesListLayerProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const { open, onClose, onNoteSelect, onNewNote, selectedNoteId, onNoteDelete, notes } = props;
+    const { open, onClose, onNoteSelect, onNewNote, selectedNoteId, onNoteDelete, notes, isVoiceSupported, isListening, onToggleListening } = props;
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleNoteSelectInternal = (note: Note) => {
@@ -76,25 +75,60 @@ export default function NotesListLayer(props: NotesListLayerProps) {
 
     return (
         <Box ref={containerRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-            <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
-                            <Box component="span" sx={{ mr: 1, fontSize: '1rem' }}>📄</Box>
-                            All Docs
-                        </Typography>
-                        <KeyboardArrowDownOutlinedIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
-                    </Box>
-                    <IconButton onClick={onNewNote} aria-label="New Note" size="small" sx={{ ml: 1 }}>
-                        <Box sx={{ fontSize: '1.2rem', lineHeight: 1 }}>+</Box>
-                    </IconButton>
+            {/* Header */}
+            <Box sx={{
+                pl: '16px',
+                pr: '16px',
+                height: '48px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Button
+                        onClick={onNewNote}
+                        size="small"
+                        variant="contained"
+                        disableElevation
+                        startIcon={<AddOutlinedIcon sx={{ fontSize: '0.9rem' }} />}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            fontSize: '0.8rem',
+                            height: '28px',
+                            px: 1.5,
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            borderRadius: '6px',
+                            '&:hover': { bgcolor: 'primary.dark' }
+                        }}
+                    >
+                        New
+                    </Button>
+                    {isVoiceSupported && (
+                        <Tooltip title={isListening ? 'Stop Listening' : 'Start Voice Input'}>
+                            <IconButton
+                                onClick={onToggleListening}
+                                size="small"
+                                sx={{
+                                    color: isListening ? 'error.main' : 'text.secondary',
+                                    bgcolor: isListening ? 'rgba(211, 47, 47, 0.08)' : 'transparent',
+                                    p: 0.5,
+                                    '&:hover': { bgcolor: isListening ? 'rgba(211, 47, 47, 0.12)' : 'rgba(0,0,0,0.04)' }
+                                }}
+                            >
+                                {isListening ? <MicOutlinedIcon sx={{ fontSize: '1.1rem' }} /> : <MicNoneOutlinedIcon sx={{ fontSize: '1.1rem' }} />}
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </Box>
-                <IconButton size="small" onClick={onClose} sx={{ color: 'text.muted' }}>
-                    <CloseOutlinedIcon fontSize="small" />
+                <IconButton size="small" onClick={onClose} sx={{ color: 'text.muted', p: 0.5 }}>
+                    <CloseOutlinedIcon sx={{ fontSize: '1.1rem' }} />
                 </IconButton>
             </Box>
 
-            <Box sx={{ px: 2, mb: 2 }}>
+            {/* Search */}
+            <Box sx={{ pl: '16px', pr: '16px', pb: '20px' }}>
                 <TextField
                     placeholder="Search docs…"
                     variant="standard"
@@ -110,25 +144,26 @@ export default function NotesListLayer(props: NotesListLayerProps) {
                             </InputAdornment>
                         ),
                         sx: {
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             bgcolor: 'rgba(0, 0, 0, 0.03)',
                             px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
+                            py: 1,
+                            borderRadius: '6px',
                         }
                     }}
                 />
             </Box>
 
-            <Box sx={{ flex: 1, overflow: 'hidden', px: 1 }}>
+            {/* Notes List */}
+            <Box sx={{ flex: 1, overflow: 'hidden' }}>
                 {filteredNotes.length === 0 ? (
-                    <Box sx={{ textAlign: 'center', py: 8 }}>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    <Box sx={{ textAlign: 'center', py: 10, px: 2 }}>
+                        <Typography variant="body2" sx={{ color: 'text.muted' }}>
                             {searchQuery ? 'No results found' : 'Nothing here yet'}
                         </Typography>
                     </Box>
                 ) : (
-                    <List disablePadding sx={{ height: '100%', overflowY: 'auto' }}>
+                    <List disablePadding sx={{ height: '100%', overflowY: 'auto', px: '16px' }}>
                         {filteredNotes.map((note) => (
                             <NoteRow
                                 key={note.id}

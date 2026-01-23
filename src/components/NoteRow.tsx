@@ -10,6 +10,8 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, IconButton, Chip } from '@mui/material';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { Note } from '../lib/domain/types';
 
 export interface NoteRowProps {
@@ -17,22 +19,6 @@ export interface NoteRowProps {
     isSelected: boolean;
     onSelect: (note: Note) => void;
     onDelete: (noteId: string) => void;
-}
-
-/**
- * Mock helper to get an emoji based on note title
- */
-function getEmoji(title: string): string {
-    const t = title.toLowerCase();
-    if (t.includes('interview')) return '🤝';
-    if (t.includes('mobile')) return '📱';
-    if (t.includes('stripe') || t.includes('billing')) return '💳';
-    if (t.includes('database')) return '🗄️';
-    if (t.includes('marketing')) return '📈';
-    if (t.includes('analytics') || t.includes('report')) return '📊';
-    if (t.includes('meeting')) return '📝';
-    if (t.includes('onboarding')) return '👋';
-    return '📄';
 }
 
 /**
@@ -58,7 +44,6 @@ function formatDate(date: number): string {
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
 
-    // For older dates, match the screenshot style: "May 19, 2020 1:46pm"
     return d.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -80,11 +65,9 @@ export default function NoteRow({
 }: NoteRowProps) {
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
-    const emoji = getEmoji(note.title);
     const tags = getTags(note.title);
     const formattedDate = mounted ? formatDate(note.createdAt) : '';
 
@@ -95,69 +78,73 @@ export default function NoteRow({
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: 1.5,
-                px: 2,
+                py: 1.25,
+                px: 1.5,
                 cursor: 'pointer',
-                borderRadius: 1,
-                mb: 0.5,
-                transition: 'all 0.12s ease-out',
-                backgroundColor: isSelected ? 'action.selected' : 'transparent',
+                borderRadius: '6px',
+                mb: 0.25,
+                transition: 'background-color 0.12s ease',
+                backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
                 '&:hover': {
-                    backgroundColor: isSelected ? 'action.selected' : 'rgba(0, 0, 0, 0.02)',
+                    backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.1)' : 'rgba(0, 0, 0, 0.03)',
                     '& .delete-button': {
                         opacity: 1,
                     }
                 },
             }}
         >
-            {/* Emoji Icon */}
-            <Typography sx={{ fontSize: '1.2rem', mr: 2, mt: -0.2 }}>
-                {emoji}
-            </Typography>
+            {/* Icon */}
+            <Box sx={{
+                color: isSelected ? 'primary.main' : 'text.muted',
+                mr: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                opacity: isSelected ? 0.85 : 0.5,
+                flexShrink: 0
+            }}>
+                {isSelected ? <DescriptionIcon sx={{ fontSize: '1rem' }} /> : <DescriptionOutlinedIcon sx={{ fontSize: '1rem' }} />}
+            </Box>
 
-            {/* Title & Snippet */}
+            {/* Title */}
             <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
                 <Typography
                     sx={{
-                        fontWeight: 500,
-                        fontSize: '0.95rem',
-                        color: 'text.primary',
+                        fontWeight: isSelected ? 500 : 400,
+                        fontSize: '0.875rem',
+                        color: isSelected ? 'text.primary' : 'text.secondary',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        borderBottom: isSelected ? '1px solid transparent' : '1px solid rgba(0,0,0,0.1)',
-                        display: 'inline-block',
-                        maxWidth: '100%',
                     }}
                 >
                     {note.title || 'Untitled'}
                 </Typography>
             </Box>
 
-            {/* Metadata Section (Right side) */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                {/* Date */}
-                <Typography
-                    variant="caption"
-                    sx={{
-                        color: 'text.secondary',
-                        whiteSpace: 'nowrap',
-                        fontSize: '0.8rem',
-                    }}
-                >
-                    {formattedDate}
-                </Typography>
+            {/* Date */}
+            <Typography
+                variant="caption"
+                sx={{
+                    color: 'text.muted',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.75rem',
+                    flexShrink: 0,
+                }}
+            >
+                {formattedDate}
+            </Typography>
 
-                {/* Tags */}
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
+            {/* Tags */}
+            {tags.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
                     {tags.map((tag) => (
                         <Chip
                             key={tag.label}
                             label={tag.label}
                             size="small"
                             sx={{
-                                height: 20,
-                                fontSize: '0.7rem',
+                                height: 18,
+                                fontSize: '0.65rem',
                                 fontWeight: 600,
                                 backgroundColor: tag.color,
                                 color: tag.textColor,
@@ -166,28 +153,30 @@ export default function NoteRow({
                         />
                     ))}
                 </Box>
+            )}
 
-                {/* Delete Button (visible on hover) */}
-                <IconButton
-                    className="delete-button"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(note.id);
-                    }}
-                    aria-label="Delete note"
-                    size="small"
-                    sx={{
-                        opacity: 0,
-                        transition: 'opacity 0.2s',
-                        color: 'text.muted',
-                        '&:hover': {
-                            color: 'error.main',
-                        },
-                    }}
-                >
-                    <DeleteOutlineOutlinedIcon fontSize="small" />
-                </IconButton>
-            </Box>
+            {/* Delete Button */}
+            <IconButton
+                className="delete-button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(note.id);
+                }}
+                aria-label="Delete note"
+                size="small"
+                sx={{
+                    opacity: 0,
+                    transition: 'opacity 0.15s',
+                    color: 'text.muted',
+                    ml: 1,
+                    p: 0.5,
+                    '&:hover': {
+                        color: 'error.main',
+                    },
+                }}
+            >
+                <DeleteOutlineOutlinedIcon sx={{ fontSize: '1rem' }} />
+            </IconButton>
         </Box>
     );
 }
